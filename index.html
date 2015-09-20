@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Ant Canvas</title>
+  </head>
+  <body>
+    <canvas id="theCanvas" width="578" height="200"></canvas>
+    <button id="toggle">toggle run</button>
+    <script>
+      var g_run = false;
+      window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame ||
+          window.webkitRequestAnimationFrame ||
+          window.mozRequestAnimationFrame ||
+          window.oRequestAnimationFrame ||
+          window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+      function animate(canvas, cx) {
+        // clear
+        cx.clearRect(0, 0, canvas.width, canvas.height);
+
+        var dx, x = 100;
+        var dy, y = 50;
+        cx.fillStyle = "#FFFFFF";
+        cx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (var i = 0; i < 100; i++) {
+          dx = Math.floor( Math.random()*2)-1;
+          dy = Math.floor( Math.random()*2)-1;
+          if (isSteppedOn(x, y)) {
+            x += dx;
+            y += dy;
+          }
+          else {
+            setPixel(x, y, [0,0,0,255]);
+          }
+        }
+
+        // request new frame
+        if (g_run) {
+          requestAnimFrame(function() {
+            animate(canvas, cx);
+          });
+        }
+      }
+
+      function setPixel(x, y, color) {
+        // write a pixel
+        d[0]   = color[0];
+        d[1]   = color[1];
+        d[2]   = color[2];
+        d[3]   = color[3];
+        cx.putImageData(id, x, y);
+      }
+      function isSteppedOn(x, y) {
+        var p = cx.getImageData(x, y, 1, 1).data;
+        if (p[0] < 10 && p[1] < 10 && p[2] < 10 && p[3] > 200) {
+          return true;
+        }
+        return false;
+      }
+      var canvas = document.getElementById('theCanvas');
+      var cx = canvas.getContext('2d');
+      var id = cx.createImageData(1,1); // only do this once per page
+      var d  = id.data;
+      var p;
+
+      // init the entire canvas to white
+      cx.fillStyle = "#FFFFFF";
+      cx.fillRect(0, 0, canvas.width, canvas.height);
+
+      animate(canvas, cx);
+
+      // bind event handler to clear button
+      document.getElementById('toggle').addEventListener('click', function() {
+        g_run = !g_run;
+        if (g_run) {
+          animate(canvas, cx);
+        }
+      }, false);
+
+    </script>
+  </body>
+</html>
