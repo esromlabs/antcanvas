@@ -27,9 +27,9 @@
         cx.fillStyle = "#FFFFFF";
         cx.fillRect(0, 0, canvas.width, canvas.height);
 
-        for (var i = 0; i < 100; i++) {
-          dx = Math.floor( Math.random()*2)-1;
-          dy = Math.floor( Math.random()*2)-1;
+        for (var i = 0; i < 1000; i++) {
+          dx = Math.floor( Math.random()*3)-1;
+          dy = Math.floor( Math.random()*3)-1;
           if (isSteppedOn(x, y)) {
             x += dx;
             y += dy;
