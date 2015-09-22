@@ -19,7 +19,7 @@
 			}
 			if (sel.element === "node") {
 				res.nodes = [];
-				$.each(graphlet.nodes, function(i, o) {
+				U.each(graphlet.nodes, function(i, o) {
 					if (sel.id && sel.id === o.id) {
 						res.nodes.push(o);
 						return false;
@@ -31,7 +31,7 @@
 			}
 			else if (sel.element === "edge") {
 				res.edges = [];
-				$.each(graphlet.edges, function(i, o) {
+				U.each(graphlet.edges, function(i, o) {
 					if ((!sel.type || sel.type === 'all' || o[2] === sel.type) &&
 						(!sel.from || o[0] === sel.from) &&
 						(!sel.to || o[1] === sel.to)
@@ -58,7 +58,7 @@
 		  var hba_str = "1_hbumtf_v0\n";
 		  if (graphlet.nodes) {
 		    hba_str += "nodes:\n";
-		    $.each(graphlet.nodes, function(i, n) {
+		    U.each(graphlet.nodes, function(i, n) {
 		      var name = "", io_pin = "", data_value = "", process_str = "";
 		      if (n.name) {name = n.name.substr(0,9);}
 		      if (n.io && n.name) {io_pin = n.io[n.name];}
@@ -71,7 +71,7 @@
 		  }
 		  if (graphlet.edges) {
 		    hba_str += "edges:\n";
-		    $.each(graphlet.edges, function(i, e) {
+		    U.each(graphlet.edges, function(i, e) {
 		      var from = 0, to = 0, e_type = "", name = "", guard = "";
 		      from = this.node_index(e[0]);
 		      to = this.node_index(e[1]);
@@ -87,7 +87,7 @@
 		},
 		"node_index": function(id) {
 		  var node_index = -1;
-			$.each(graphlet.nodes, function(i, n) {
+			U.each(graphlet.nodes, function(i, n) {
 				if (id === n.id) {
 					node_index = i;
 				}

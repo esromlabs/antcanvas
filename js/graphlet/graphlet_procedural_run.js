@@ -2,7 +2,7 @@
 //
 var U = {
   each: function (it, fn) {
-    if (it.length !== undefined) {
+    if (it && it.length !== undefined) {
       for (var i = 0; i < it.length; i += 1) {
         call(it, i, it[i]);
       }
@@ -14,11 +14,36 @@ var U = {
         }
       }
     }
+  },
+  // Deep extend
+  // If a key has another object as its value, the first object's value will be combined with the second one during the merge.
+  extend: function ( objects ) {
+      var extended = {};
+      var self = this;
+      var merge = function (obj) {
+          for (var prop in obj) {
+              if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+                  if ( Object.prototype.toString.call(obj[prop]) === '[object Object]' ) {
+                      extended[prop] = self.extend(extended[prop], obj[prop]);
+                  }
+                  else {
+                      extended[prop] = obj[prop];
+                  }
+              }
+          }
+      };
+      merge(arguments[0]);
+      for (var i = 1; i < arguments.length; i++) {
+          var obj = arguments[i];
+          merge(obj);
+      }
+      return extended;
   }
 };
 
 (function(U, gq) {
   var glt;
+  var current_node;
   var step_rate = 0;
 
 
@@ -106,19 +131,8 @@ var U = {
       var edge = unpack_edge(e);
       var end_node = gq.using(g).find({"element":"node", "id":edge.to}).nodes()[0];
       var start_node = gq.using(g).find({"element":"node", "id":id}).nodes()[0];
-      var effect_options;
-      if (start_node.data && start_node.data.effect && end_node.io && end_node.io.selector) {
-        effect_options = $.extend({"complete":function() {
-          console.log("effect complete");
-          end_node.data['effect_state'] = "done";
-        }}, start_node.data);
-        end_node.data['effect_state'] = "start";
-        $(end_node.io.selector).effect(effect_options);
-      }
-      else {
-        console.log("trigger not implemented for message " + edge.type);
-        //$('body').trigger(edge.type);
-      }
+      console.log("event was not triggered (not implemented) for message " + edge.type);
+      //$('body').trigger(edge.type);
     });
   };
 
@@ -157,7 +171,10 @@ var U = {
             if (step_rate) {
               vis_run_state("edge[source='"+edge.from+"'][target='"+edge.to+"']", "active_run_flo", step_rate);
             }
-            setTimeout(function() {$("body").trigger("edge_" + edge.index);}, step_rate);
+            setTimeout(function() {
+              //$("body").trigger("edge_" + edge.index);
+              this.current_node = edge.to;
+              }, step_rate);
             return false; // escape the each iterator
           }
         }
@@ -165,7 +182,8 @@ var U = {
     }
   };
 
-  var run_node = function(target_node) {
+  var run_node = function() {
+    var target_node = this.current_node;
     var orig_step_rate = step_rate;
     var pause_mode = false;
     var get_data = get_all(target_node.id);
@@ -184,7 +202,7 @@ var U = {
     }
     get_data.defered_transition = false;
     if (target_node.data) {
-      get_data = $.extend(get_data, target_node.data);
+      get_data = U.extend(get_data, target_node.data);
     }
     if (target_node.process) {
       get_data.wait = wait;
@@ -213,7 +231,7 @@ var U = {
 			document: {}
 		};
 		// and mix in the environment
-		locals = $.extend({}, locals, env);
+		locals = U.extend(locals, env);
 
 		var createSandbox = function (env, code, locals) {
 			var params = []; // the names of local variables
@@ -248,7 +266,7 @@ var U = {
 			document: {}
 		};
 		// and mix in the environment
-		locals = $.extend(locals, env);
+		locals = U.extend(locals, env);
 
 		var createSandbox = function (env, code, locals) {
 			var params = []; // the names of local variables
@@ -277,23 +295,26 @@ var U = {
 	};
 
   set_step_rate = function() {
-    step_rate = parseInt($("#run_step_rate").val(), 10) || 0;
-    $('body').trigger('run_step_rate_change', step_rate);
+    //step_rate = parseInt($("#run_step_rate").val(), 10) || 0;
+    //$('body').trigger('run_step_rate_change', step_rate);
   };
 
+  // pass in a graphlet data structure to be run.
   init_graphlet = function(g) {
-    var io_nodes = gq.using(g).find({"element":"node", "type":"io"}).nodes();
-    var flo_edges = gq.using(g).find({"element":"edge", "type":"flo"}).edges();
+    var init_node = gq.using(g).find({"element":"node", "type":"init"}).nodes();
+    var start_node = gq.using(g).find({"element":"node", "type":"init"}).nodes();
     this.glt = g;
+    this.current_node = start_node;
     // cancel any previous listeners for a graph_init message.
-    $('body').off('graph_init');
-    set_step_rate();
+    //$('body').off('graph_init');
+    //set_step_rate();
     if (g.graph && g.graph.template) {
-			$(function() {
-				$("#graphlet").html(g.graph.template);
-			});
+			//$(function() {
+			//	$("#graphlet").html(g.graph.template);
+			//});
 		}
-		U.each(io_nodes, function init_io_node(i, node) {
+		/*
+    U.each(io_nodes, function init_io_node(i, node) {
 		  var selector, selector_str;
 		  var sel_dom;
 		  var event_edges;
@@ -326,22 +347,24 @@ var U = {
 		  }
 	    if (event_edges) {
 	      selector = node.io.selector || 'body';
-	      U.each(event_edges, function turn_off_events (i, e) {
-	        var edge = unpack_edge(e);
-	        $(selector).off(edge.name);
-	      });
+	      //U.each(event_edges, function turn_off_events (i, e) {
+	      //  var edge = unpack_edge(e);
+	      //  $(selector).off(edge.name);
+	      //});
 	      U.each(event_edges, function prepare_events (i, e) {
 	        var edge = unpack_edge(e);
     			var target_node = gq.using(g).find({"element":"node", "id":edge.to}).nodes()[0];
     			$(selector).on(edge.name, function fire_evt() {
     				// DOM events are mapped to edges. the event source data is transfered to the
     				// target node, then the target node is run by calling run_node().
-    				target_node.data = $.extend({}, target_node.data, node.data);
+    				target_node.data = U.extend(target_node.data, node.data);
     				run_node(target_node);
     			});
 	      });
 	    }
 		});
+    */
+    /*
     U.each(flo_edges, function prepare_flows(i, e) {
       var edge = unpack_edge(e);
 			$("body").off("edge_" + edge.index);
@@ -350,8 +373,10 @@ var U = {
 				run_node(target_node);
 			});
 		});
+    */
     console.log("trigger of graph_init event");
-    $('body').trigger('graph_init');
+    return this;
+    //$('body').trigger('graph_init');
   };
 
 })(U, gq);
