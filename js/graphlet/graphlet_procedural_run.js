@@ -1,23 +1,89 @@
 // graphlet run
 //
+// a JQuery bits mini module
 var U = {
-  each: function (it, fn) {
-    if (it && it.length !== undefined) {
-      for (var i = 0; i < it.length; i += 1) {
-        fn.call(this, i, it[i]);
-      }
-    }
-    else {
-      for (var prop in it) {
-        if( !it.hasOwnProperty( prop ) ) {
-          fn.call(this, prop, it[prop]);
-        }
-      }
-    }
-  },
-  // Deep extend
-  // If a key has another object as its value, the first object's value will be combined with the second one during the merge.
-  extend: function ( objects ) {
+	class2type : {
+		"[object Boolean]": "boolean",
+		"[object Number]": "number",
+		"[object String]": "string",
+		"[object Function]": "function",
+		"[object Array]": "array",
+		"[object Date]": "date",
+		"[object RegExp]": "regexp",
+		"[object Object]": "object",
+		"[object Error]": "error"
+	},
+	"type" :function (obj) {
+		if (obj == null) {
+			return String(obj);
+		}
+		// Support: Safari <= 5.1 (functionish RegExp)
+		return typeof obj === "object" || typeof obj === "function" ? this.class2type["".toString.call(obj)] || "object" : typeof obj;
+	}, 
+	isArraylike: function isArraylike(obj) {
+		var length = obj.length,
+			type = this.type(obj);
+
+		//if (jQuery.isWindow(obj)) {
+		//    return false;
+		//}
+
+		if (obj.nodeType === 1 && length) {
+			return true;
+		}
+
+		return type === "array" || type !== "function" && (length === 0 || typeof length === "number" && length > 0 && (length - 1) in obj);
+	},
+	each: function (obj, callback, args) {
+		var value, i = 0,
+			length = obj.length,
+			isArray = this.isArraylike(obj);
+
+		if (args) {
+			if (isArray) {
+				for (; i < length; i++) {
+					value = callback.apply(obj[i], args);
+
+					if (value === false) {
+						break;
+					}
+				}
+			} else {
+				for (i in obj) {
+					value = callback.apply(obj[i], args);
+
+					if (value === false) {
+						break;
+					}
+				}
+			}
+
+			// A special, fast, case for the most common use of each
+		} else {
+			if (isArray) {
+				for (; i < length; i++) {
+					value = callback.call(obj[i], i, obj[i]);
+
+					if (value === false) {
+						break;
+					}
+				}
+			} else {
+				for (i in obj) {
+					value = callback.call(obj[i], i, obj[i]);
+
+					if (value === false) {
+						break;
+					}
+				}
+			}
+		}
+
+		return obj;
+	},
+	// Deep extend
+	// If a key has another object as its value, the first object's value will be combined with the second one during the merge.
+	extend: function ( objects ) {
       var extended = {};
       var self = this;
       var merge = function (obj) {
