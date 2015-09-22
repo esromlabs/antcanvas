@@ -4,13 +4,13 @@ var U = {
   each: function (it, fn) {
     if (it && it.length !== undefined) {
       for (var i = 0; i < it.length; i += 1) {
-        call(it, i, it[i]);
+        fn.call(this, i, it[i]);
       }
     }
     else {
       for (var prop in it) {
         if( !it.hasOwnProperty( prop ) ) {
-          call( fn, prop, it[prop]);
+          fn.call(this, prop, it[prop]);
         }
       }
     }
