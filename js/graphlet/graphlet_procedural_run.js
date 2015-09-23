@@ -2,15 +2,18 @@
 //
 var U = {
   each: function (it, fn) {
+    var more;
     if (it && it.length !== undefined) {
       for (var i = 0; i < it.length; i += 1) {
-        fn.call(this, i, it[i]);
+        more = fn.call(this, i, it[i]);
+        if (!more) { return; }
       }
     }
     else {
       for (var prop in it) {
         if( !it.hasOwnProperty( prop ) ) {
-          fn.call(this, prop, it[prop]);
+          more = fn.call(this, prop, it[prop]);
+          if (!more) { return; }
         }
       }
     }
@@ -54,7 +57,7 @@ var U = {
   // get all values from get edges and return as an object
   var get_all = function(id) {
     var got_obj = {};
-    var g = this.glt;
+    var g = glt;
     var get_edges = gq.using(g).find({"element":"edge", "type":"get", "from":id}).edges();
 
     U.each(get_edges, function get_edge (i, e) {
@@ -121,7 +124,7 @@ var U = {
   };
 
   var set_all = function(id, result) {
-    var g = this.glt;
+    var g = glt;
     //var from_node = gq.using(g).find({"element":"node", "id":id}).nodes();
     var set_edges = gq.using(g).find({"element":"edge", "type":"set", "from":id}).edges();
     var pub_edges = gq.using(g).find({"element":"edge", "type":"pub", "from":id}).edges();
@@ -138,7 +141,7 @@ var U = {
 
   var transition_to = function(id, get_result) {
     var gone = false; // no transition has been found, this boolean is used to stop multiple edges from firing.
-    var g = this.glt;
+    var g = glt;
     var trans_edges = gq.using(g).find({"element":"edge", "type":"flo", "from":id}).edges();
     // first go through only the restrictive guarded flo edges.
     U.each(trans_edges, function restrictive_flo(i, e) {
@@ -149,12 +152,13 @@ var U = {
 
         if (guard.result) {
           console.log("trigger transition "+edge.from+" -> "+edge.to);
-          if (step_rate) {
-            vis_run_state("edge[source='"+edge.from+"'][target='"+edge.to+"']", "active_run_flo", step_rate);
-          }
+          //if (step_rate) {
+          //  vis_run_state("edge[source='"+edge.from+"'][target='"+edge.to+"']", "active_run_flo", step_rate);
+          //}
           //setTimeout(function() {
               //$("body").trigger("edge_" + edge.index);
           //  }, step_rate);
+          current_node = edge.to;
           gone = true;
           return false; // escape the each iterator
         }
@@ -168,13 +172,10 @@ var U = {
         if (!edge.guard & !gone) {
           if (guard.result) {
             console.log("trigger transition "+edge.from+" -> "+edge.to);
-            if (step_rate) {
-              vis_run_state("edge[source='"+edge.from+"'][target='"+edge.to+"']", "active_run_flo", step_rate);
-            }
-            setTimeout(function() {
-              //$("body").trigger("edge_" + edge.index);
-              this.current_node = edge.to;
-              }, step_rate);
+            //if (step_rate) {
+            //  vis_run_state("edge[source='"+edge.from+"'][target='"+edge.to+"']", "active_run_flo", step_rate);
+            //}
+            current_node = edge.to;
             return false; // escape the each iterator
           }
         }
@@ -182,10 +183,11 @@ var U = {
     }
   };
 
-  var run_node = function() {
-    var target_node = this.current_node;
+  run_node = function() {
+    var target_node = current_node;
     var orig_step_rate = step_rate;
     var pause_mode = false;
+    // get phase
     var get_data = get_all(target_node.id);
     var this_node;
     var wait = function(milliseconds) {
@@ -193,17 +195,18 @@ var U = {
       get_data.defered_transition = true;
       setTimeout(function() {transition_to(target_node.id, {});}, milliseconds);
     };
-    if (vis_node_selected(target_node.id)) {
-      pause_mode = true;
-      step_rate = 5000;
-    }
-    if (step_rate) {
-      vis_run_state("node[id='"+target_node.id+"']", "active_run_node", step_rate);
-    }
+    //if (vis_node_selected(target_node.id)) {
+    //  pause_mode = true;
+    //  step_rate = 5000;
+    //}
+    //if (step_rate) {
+    //  vis_run_state("node[id='"+target_node.id+"']", "active_run_node", step_rate);
+    //}
     get_data.defered_transition = false;
     if (target_node.data) {
       get_data = U.extend(get_data, target_node.data);
     }
+    // process phase
     if (target_node.process) {
       get_data.wait = wait;
       get_data.target_node_id = target_node.id;
@@ -212,14 +215,17 @@ var U = {
       });
     }
 
-    setTimeout(function() {
-      set_all(target_node.id, get_data);
-      if (!get_data.defered_transition) {
-        transition_to(target_node.id, get_data);
-      }
-    }, step_rate/2);
+    //setTimeout(function() {
+    // set phase
+    set_all(target_node.id, get_data);
+    // transition phase
+    if (!get_data.defered_transition) {
+      transition_to(target_node.id, get_data);
+    }
+    //}, step_rate/2);
 
     step_rate = orig_step_rate;
+    return current_node;
   };
 
 	// sandbox for functional (saferEval)
@@ -302,9 +308,9 @@ var U = {
   // pass in a graphlet data structure to be run.
   init_graphlet = function(g) {
     var init_node = gq.using(g).find({"element":"node", "type":"init"}).nodes();
-    var start_node = gq.using(g).find({"element":"node", "type":"init"}).nodes();
-    this.glt = g;
-    this.current_node = start_node;
+    var start_node = gq.using(g).find({"element":"node", "type":"start"}).nodes();
+    glt = g;
+    current_node = start_node;
     // cancel any previous listeners for a graph_init message.
     //$('body').off('graph_init');
     //set_step_rate();
@@ -375,7 +381,7 @@ var U = {
 		});
     */
     console.log("trigger of graph_init event");
-    return this;
+
     //$('body').trigger('graph_init');
   };
 

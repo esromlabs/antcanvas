@@ -18,23 +18,25 @@
     <button id="toggle">toggle run</button>
 	<div class="footer"><small>V_0.0.0.0 (got to start some where)</small></div>
     <script>
-      var graph = {"graph":{"name":"Loop 1","template":"<button id='start_button'>Start</button><div class='counter'></div>"}, "nodes":[
+      var graph = {"graph":{"name":"ant_1","template":"<button id='start_button'>Start</button><div class='counter'></div>"}, "nodes":[
   {"id":"n4","data":{"c":0},"name":"c"},
   {"id":"n3","name":"c","io":{"selector":".counter"},"data":{"c":0}},
-  {"name":"fin","id":"n5","data":{"c":0}},
-  {"name":"c+=1","process":["this.c = c + 1;"],"id":"n1"},
-  {"name":"start","id":"n0","io":{"selector":"#start_button"}}
+  {"name":"fin","id":"n5"},
+  {"name":"c+=1","process":["this.c = c + 1;","setPixel(c, 50, [0,0,0,255]);"],"id":"n1"},
+  {"name":"start","id":"n0","type":"start"}
  ],
  "edges":[
   ["n1","n5","flo","","",0],
   ["n1","n3","set","","",1],
-  ["n0","n4","sub","click","",2],
+  ["n0","n4","flo","","",2],
   ["n4","n1","flo","","",3],
   ["n1","n3","get","","",4],
   ["n4","n3","set","","",5],
-  ["n1","n1","flo","","c <=5",6]
- ]};
-      var graphlet = init_graphlet(graph);
+  ["n1","n1","flo","","c <=500",6]
+ ],
+ "views":[{"name":"primary","nodes":{"n4":{"position":{"x":120,"y":146}},"n3":{"position":{"x":323,"y":163}},"n5":{"position":{"x":208,"y":302}},"n1":{"position":{"x":122,"y":267}},"n0":{"position":{"x":192,"y":56}}},"edges":{}}]
+};
+      init_graphlet(graph);
       var x = 100, y = 50;
       var g_run = false;
       var g_step_on_toes = 500;
@@ -49,21 +51,10 @@
         };
       })();
       function animate(canvas, cx) {
-        graphlet.run_node();
-        var dx;
-        var dy;
-
-        dx = Math.floor( Math.random()*3)-1;
-        dy = Math.floor( Math.random()*3)-1;
-        x += dx;
-        y += dy;
-        if (isSteppedOn(x, y)) {
-          g_step_on_toes -= 1;
-          if ((g_step_on_toes > 0) !== g_run) {
-            set_run((g_step_on_toes > 0));
-          }
+        var last_node = run_node();
+        if (last_node.name === 'fin') {
+          g_gun = false;
         }
-        setPixel(x, y, [0,0,0,255]);
 
         // request new frame
         if (g_run) {
