@@ -1,23 +1,83 @@
 // graphlet run
 //
 var U = {
-  each: function (it, fn) {
-    var more;
-    if (it && it.length !== undefined) {
-      for (var i = 0; i < it.length; i += 1) {
-        more = fn.call(this, i, it[i]);
-        if (!more) { return; }
-      }
+  // this.each` from 2.0.3 and supporting helpers
+  class2type:{
+    "[object Boolean]": "boolean",
+    "[object Number]": "number",
+    "[object String]": "string",
+    "[object Function]": "function",
+    "[object Array]": "array",
+    "[object Date]": "date",
+    "[object RegExp]": "regexp",
+    "[object Object]": "object",
+    "[object Error]": "error"
+},
+"type": function (obj) {
+    if (obj == null) {
+        return String(obj);
     }
-    else {
-      for (var prop in it) {
-        if( !it.hasOwnProperty( prop ) ) {
-          more = fn.call(this, prop, it[prop]);
-          if (!more) { return; }
+    // Support: Safari <= 5.1 (functionish RegExp)
+    var s = new Object();
+    return typeof obj === "object" || typeof obj === "function" ? this.class2type[s.toString.call(obj)] || "object" : typeof obj;
+},
+isArraylike: function (obj) {
+    var length = obj.length,
+        type = this.type(obj);
+
+    if (obj.nodeType === 1 && length) {
+        return true;
+    }
+
+    return type === "array" || type !== "function" && (length === 0 || typeof length === "number" && length > 0 && (length - 1) in obj);
+},
+  each: function (obj, callback, args) {
+    var value, i = 0,
+        length = obj.length,
+        isArray = this.isArraylike(obj);
+
+    if (args) {
+        if (isArray) {
+            for (; i < length; i++) {
+                value = callback.apply(obj[i], args);
+
+                if (value === false) {
+                    break;
+                }
+            }
+        } else {
+            for (i in obj) {
+                value = callback.apply(obj[i], args);
+
+                if (value === false) {
+                    break;
+                }
+            }
         }
-      }
+
+        // A special, fast, case for the most common use of each
+    } else {
+        if (isArray) {
+            for (; i < length; i++) {
+                value = callback.call(obj[i], i, obj[i]);
+
+                if (value === false) {
+                    break;
+                }
+            }
+        } else {
+            for (i in obj) {
+                value = callback.call(obj[i], i, obj[i]);
+
+                if (value === false) {
+                    break;
+                }
+            }
+        }
     }
-  },
+
+    return obj;
+},
   // Deep extend
   // If a key has another object as its value, the first object's value will be combined with the second one during the merge.
   extend: function ( objects ) {
@@ -147,6 +207,7 @@ var U = {
     U.each(trans_edges, function restrictive_flo(i, e) {
       var edge = unpack_edge(e);
       var guard = {"result":false};
+      var dest_node;
       if (edge.guard && !gone) {
         guard = run_edge_guard(get_result, edge.guard);
 
@@ -158,7 +219,8 @@ var U = {
           //setTimeout(function() {
               //$("body").trigger("edge_" + edge.index);
           //  }, step_rate);
-          current_node = edge.to;
+          dest_node = gq.using(g).find({"element":"node", "id":edge.to}).nodes()[0];
+          current_node = dest_node;
           gone = true;
           return false; // escape the each iterator
         }
@@ -169,13 +231,15 @@ var U = {
       U.each(trans_edges, function free_flo(i, e) {
         var edge = unpack_edge(e);
         var guard = {"result":true};
+        var dest_node;
         if (!edge.guard & !gone) {
           if (guard.result) {
             console.log("trigger transition "+edge.from+" -> "+edge.to);
             //if (step_rate) {
             //  vis_run_state("edge[source='"+edge.from+"'][target='"+edge.to+"']", "active_run_flo", step_rate);
             //}
-            current_node = edge.to;
+            dest_node = gq.using(g).find({"element":"node", "id":edge.to}).nodes()[0];
+            current_node = dest_node;
             return false; // escape the each iterator
           }
         }
@@ -310,7 +374,7 @@ var U = {
     var init_node = gq.using(g).find({"element":"node", "type":"init"}).nodes();
     var start_node = gq.using(g).find({"element":"node", "type":"start"}).nodes();
     glt = g;
-    current_node = start_node;
+    current_node = start_node[0];
     // cancel any previous listeners for a graph_init message.
     //$('body').off('graph_init');
     //set_step_rate();

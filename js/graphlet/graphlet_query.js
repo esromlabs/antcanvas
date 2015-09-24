@@ -24,7 +24,7 @@
 						res.nodes.push(o);
 						return false;
 					}
-					if (sel.type && o[sel.type]) {
+					if (sel.type && o['type'] && o['type'] === sel.type) {
 						res.nodes.push(o);
 					}
 				});

@@ -16,7 +16,7 @@
   <body>
     <canvas id="theCanvas" width="578" height="200"></canvas>
     <button id="toggle">toggle run</button>
-	<div class="footer"><small>V_0.0.0.0 (got to start some where)</small></div>
+	<div class="footer"><small>V_0.0.0.0 (got to start somewhere)</small></div>
     <script>
       var graph = {"graph":{"name":"ant_1","template":"<button id='start_button'>Start</button><div class='counter'></div>"}, "nodes":[
   {"id":"n4","data":{"c":0},"name":"c"},
@@ -36,10 +36,7 @@
  ],
  "views":[{"name":"primary","nodes":{"n4":{"position":{"x":120,"y":146}},"n3":{"position":{"x":323,"y":163}},"n5":{"position":{"x":208,"y":302}},"n1":{"position":{"x":122,"y":267}},"n0":{"position":{"x":192,"y":56}}},"edges":{}}]
 };
-      init_graphlet(graph);
-      var x = 100, y = 50;
       var g_run = false;
-      var g_step_on_toes = 500;
       window.requestAnimFrame = (function(callback) {
         return window.requestAnimationFrame ||
           window.webkitRequestAnimationFrame ||
@@ -50,10 +47,11 @@
           window.setTimeout(callback, 1000 / 60);
         };
       })();
+
       function animate(canvas, cx) {
         var last_node = run_node();
         if (last_node.name === 'fin') {
-          g_gun = false;
+          g_run = false;
         }
 
         // request new frame
@@ -84,13 +82,6 @@
       // create a one pixel image to be used to paint one pixel
       var id = cx.createImageData(1,1); // only do this once per page
       var d  = id.data;
-      var p;
-
-      // init the entire canvas to white
-      cx.fillStyle = "#FFFFFF";
-      cx.fillRect(0, 0, canvas.width, canvas.height);
-
-      //animate(canvas, cx);
 
       // bind event handler to clear button
       document.getElementById('toggle').addEventListener('click', function() {
@@ -109,9 +100,14 @@
         var class_name = (new_run)? "running": "stopped";
         document.getElementById('toggle').setAttribute("class", class_name);
         g_run = new_run;
+        if (g_run) {
+          // init the entire canvas to white
+          cx.fillStyle = "#FFFFFF";
+          cx.fillRect(0, 0, canvas.width, canvas.height);
+          // init the graphlet
+          init_graphlet(graph);
+        }
       }
-
-
     </script>
   </body>
 </html>
