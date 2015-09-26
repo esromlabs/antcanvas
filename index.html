@@ -18,13 +18,13 @@
     <button id="toggle">toggle run</button>
 	<div class="footer"><small>V_0.0.0.0 (got to start somewhere)</small></div>
     <script>
-      var graph = {"graph":{"name":"ant_1","template":"<button id='start_button'>Start</button><div class='counter'></div>"}, "nodes":[
-  {"id":"n2","name":"y","data":{"y":30}},
+      var graph = {"graph":{"name":"ant_3","template":"<button id='start_button'>Start</button><div class='counter'></div>"}, "nodes":[
+  {"id":"n2","name":"y","data":{}},
   {"name":"start","id":"n0","type":"start"},
-  {"name":"c+=1","process":["this.c = c + 1; this.y = y + 0.138","setPixel(c, y, [0,0,0,255]);"],"id":"n1"},
+  {"name":"+1","process":["this.x = x + 1; this.y = y + 0.38","setPixel(x, y, [0,0,0,255]);"],"id":"n1"},
   {"name":"fin","id":"n5"},
-  {"id":"n3","name":"c","data":{"c":0}},
-  {"id":"n4","data":{"c":0},"name":"c"}
+  {"id":"n3","name":"x","data":{}},
+  {"id":"n4","data":{"x":0,"y":0},"name":"init"}
  ],
  "edges":[
   ["n1","n5","flo","","",0],
@@ -33,11 +33,12 @@
   ["n4","n1","flo","","",3],
   ["n1","n3","get","","",4],
   ["n4","n3","set","","",5],
-  ["n1","n1","flo","","c <=500",6],
-  ["n1","n2","get","","",7],
-  ["n1","n2","set","","",8]
+  ["n4","n2","set","","",6],
+  ["n1","n1","flo","","x <= 400",7],
+  ["n1","n2","get","","",8],
+  ["n1","n2","set","","",9]
  ],
- "views":[{"name":"primary","nodes":{"n2":{"position":{"x":72,"y":121}},"n0":{"position":{"x":210,"y":63}},"n1":{"position":{"x":145,"y":205}},"n5":{"position":{"x":145,"y":311}},"n3":{"position":{"x":279,"y":203}},"n4":{"position":{"x":210,"y":127}}},"edges":{}}]
+ "views":[{"name":"primary","nodes":{"n2":{"position":{"x":295,"y":168}},"n0":{"position":{"x":111,"y":50}},"n1":{"position":{"x":154,"y":272}},"n5":{"position":{"x":213,"y":326}},"n3":{"position":{"x":207,"y":168}},"n4":{"position":{"x":158,"y":115}}},"edges":{}}]
 };
       var g_run = false;
       window.requestAnimFrame = (function(callback) {
