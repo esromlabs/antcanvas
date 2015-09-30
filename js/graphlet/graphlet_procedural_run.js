@@ -203,7 +203,7 @@ isArraylike: function (obj) {
     var gone = false; // no transition has been found, this boolean is used to stop multiple edges from firing.
     var g = glt;
     var trans_edges = gq.using(g).find({"element":"edge", "type":"flo", "from":id}).edges();
-    // first go through only the restrictive guarded flo edges.
+    // first try all restrictive (guarded) flo edges.
     U.each(trans_edges, function restrictive_flo(i, e) {
       var edge = unpack_edge(e);
       var guard = {"result":false};
@@ -212,13 +212,6 @@ isArraylike: function (obj) {
         guard = run_edge_guard(get_result, edge.guard);
 
         if (guard.result) {
-          console.log("trigger transition "+edge.from+" -> "+edge.to);
-          //if (step_rate) {
-          //  vis_run_state("edge[source='"+edge.from+"'][target='"+edge.to+"']", "active_run_flo", step_rate);
-          //}
-          //setTimeout(function() {
-              //$("body").trigger("edge_" + edge.index);
-          //  }, step_rate);
           dest_node = gq.using(g).find({"element":"node", "id":edge.to}).nodes()[0];
           current_node = dest_node;
           gone = true;
@@ -234,10 +227,6 @@ isArraylike: function (obj) {
         var dest_node;
         if (!edge.guard & !gone) {
           if (guard.result) {
-            console.log("trigger transition "+edge.from+" -> "+edge.to);
-            //if (step_rate) {
-            //  vis_run_state("edge[source='"+edge.from+"'][target='"+edge.to+"']", "active_run_flo", step_rate);
-            //}
             dest_node = gq.using(g).find({"element":"node", "id":edge.to}).nodes()[0];
             current_node = dest_node;
             return false; // escape the each iterator
@@ -375,78 +364,6 @@ isArraylike: function (obj) {
     var start_node = gq.using(g).find({"element":"node", "type":"start"}).nodes();
     glt = g;
     current_node = start_node[0];
-    // cancel any previous listeners for a graph_init message.
-    //$('body').off('graph_init');
-    //set_step_rate();
-    if (g.graph && g.graph.template) {
-			//$(function() {
-			//	$("#graphlet").html(g.graph.template);
-			//});
-		}
-		/*
-    U.each(io_nodes, function init_io_node(i, node) {
-		  var selector, selector_str;
-		  var sel_dom;
-		  var event_edges;
-		  if (node.parent) {
-		    event_edges = gq.using(g).find({"element":"edge", "type":"sub", "from":node.parent}).edges();
-		  }
-		  else {
-		    event_edges = gq.using(g).find({"element":"edge", "type":"sub", "from":node.id}).edges();
-		  }
-
-		  if (node.io && node.io.selector) {
-		    selector = node.io.selector;
-		    // initial sync the nodes data with the IO point
-		    sel_dom = $(selector)[0];
-		    if (!sel_dom) {
-		      if (selector[0] === '#') {
-		        selector_str = ' id="'+selector.substr(1)+'"';
-		      }
-		      if (selector[0] === '.') {
-		        selector_str = ' class="'+selector.substr(1)+'"';
-		      }
-		      $("#graphlet").append('<div ' + selector_str + '>'+selector_str+'</div>');
-		    }
-		    // initial syncing of DOM and data
-		    if (node.data && node.name) {
-		      $(selector).val(node.data[node.name]);
-		      $(selector).text(node.data[node.name]);
-		    }
-		    if (!node.data) {node.data = {};}
-		  }
-	    if (event_edges) {
-	      selector = node.io.selector || 'body';
-	      //U.each(event_edges, function turn_off_events (i, e) {
-	      //  var edge = unpack_edge(e);
-	      //  $(selector).off(edge.name);
-	      //});
-	      U.each(event_edges, function prepare_events (i, e) {
-	        var edge = unpack_edge(e);
-    			var target_node = gq.using(g).find({"element":"node", "id":edge.to}).nodes()[0];
-    			$(selector).on(edge.name, function fire_evt() {
-    				// DOM events are mapped to edges. the event source data is transfered to the
-    				// target node, then the target node is run by calling run_node().
-    				target_node.data = U.extend(target_node.data, node.data);
-    				run_node(target_node);
-    			});
-	      });
-	    }
-		});
-    */
-    /*
-    U.each(flo_edges, function prepare_flows(i, e) {
-      var edge = unpack_edge(e);
-			$("body").off("edge_" + edge.index);
-			$("body").on("edge_" + edge.index, function fire_flo() {
-				var target_node = gq.using(g).find({"element":"node", "id":edge.to}).nodes()[0];
-				run_node(target_node);
-			});
-		});
-    */
-    console.log("trigger of graph_init event");
-
-    //$('body').trigger('graph_init');
   };
 
 })(U, gq);
