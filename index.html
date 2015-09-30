@@ -23,7 +23,7 @@
   {"name":"y+","process":["this.y++;"],"id":"n6","data":{"x":0}},
   {"id":"n2","name":"y","data":{}},
   {"name":"start","id":"n0","type":"start"},
-  {"name":"+1","process":["this.x = x + 1;","setPixel(x+10, y+10, [0,0,0,255]);"],"id":"n1"},
+  {"name":"+1","process":["this.x = x + 1;","setPixel(x+1, y+1, [0,0,0,255]);"],"id":"n1"},
   {"name":"fin","id":"n5"},
   {"id":"n3","name":"x","data":{}},
   {"id":"n4","data":{"x":0,"y":0},"name":"init"}
@@ -65,7 +65,7 @@
       function animate(canvas, cx) {
         var last_node = run_node();
         if (last_node.name === 'fin') {
-          g_run = false;
+          g_run = set_run(false);
         }
 
         // request new frame
@@ -99,7 +99,7 @@
 
       // bind event handler to clear button
       document.getElementById('toggle').addEventListener('click', function() {
-        set_run(!g_run);
+        g_run = set_run(!g_run);
         if (g_run) {
           // clear
           x = 100;
@@ -110,17 +110,19 @@
           animate(canvas, cx);
         }
       }, false);
-      function set_run (new_run) {
+      
+      function set_run(new_run) {
         var class_name = (new_run)? "running": "stopped";
         document.getElementById('toggle').setAttribute("class", class_name);
-        g_run = new_run;
-        if (g_run) {
+
+        if (new_run) {
           // init the entire canvas to white
           cx.fillStyle = "#FFFFFF";
           cx.fillRect(0, 0, canvas.width, canvas.height);
           // init the graphlet
           init_graphlet(graph);
         }
+        return new_run;
       }
     </script>
   </body>
