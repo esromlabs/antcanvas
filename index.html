@@ -18,15 +18,16 @@
     <button id="toggle">toggle run</button>
 	<div class="footer"><small>V_0.0.0.0 (got to start somewhere)</small></div>
     <script>
-      var graph = {"graph":{"name":"ant_check_2","template":"<button id='start_button'>Start</button><div class='counter'></div>"}, "nodes":[
-  {"name":"+1","process":["this.x = x + 1;"],"id":"n7"},
-  {"name":"y+","process":["this.y++;"],"id":"n6","data":{"x":0}},
-  {"id":"n2","name":"y","data":{}},
-  {"name":"start","id":"n0","type":"start"},
-  {"name":"+1","process":["this.x = x + 1;","setPixel(x+1, y+1, [0,0,0,255]);"],"id":"n1"},
-  {"name":"fin","id":"n5"},
+      var graph = {"graph":{"name":"ant_check_3","template":"<button id='start_button'>Start</button><div class='counter'></div>"}, "nodes":[
+  {"id":"n8","name":"size","data":{"size":42}},
+  {"id":"n4","data":{"x":0,"y":0},"name":"init"},
   {"id":"n3","name":"x","data":{}},
-  {"id":"n4","data":{"x":0,"y":0},"name":"init"}
+  {"name":"fin","id":"n5"},
+  {"name":"+1","process":["this.x = x + 1;","setPixel(x, y, [0,0,0,255]);"],"id":"n1"},
+  {"name":"start","id":"n0","type":"start"},
+  {"id":"n2","name":"y","data":{}},
+  {"name":"y+","process":["this.y++;"],"id":"n6","data":{"x":0}},
+  {"name":"+1","process":["this.x = x + 1;"],"id":"n7"}
  ],
  "edges":[
   ["n1","n3","set","","",0],
@@ -36,19 +37,21 @@
   ["n4","n3","set","","",4],
   ["n4","n2","set","","",5],
   ["n1","n2","get","","",6],
-  ["n6","n5","flo","","y >=8",7],
+  ["n6","n5","flo","","y >= size",7],
   ["n1","n7","flo","","",8],
   ["n7","n3","get","","",9],
   ["n7","n3","set","","",10],
-  ["n7","n6","flo","","x >= 8",11],
-  ["n6","n1","flo","","y%2 === 0",12],
+  ["n7","n6","flo","","x >= size",11],
+  ["n6","n1","flo","","!(y%2)",12],
   ["n6","n2","get","","",13],
   ["n6","n2","set","","",14],
   ["n7","n1","flo","","",15],
   ["n6","n3","set","","",16],
-  ["n6","n7","flo","","y%2 === 1",17]
+  ["n6","n7","flo","","(y%2)",17],
+  ["n7","n8","get","","",18],
+  ["n6","n8","get","","",19]
  ],
- "views":[{"name":"primary","nodes":{"n7":{"position":{"x":264,"y":267}},"n6":{"position":{"x":150,"y":312}},"n2":{"position":{"x":65,"y":177}},"n0":{"position":{"x":154,"y":63}},"n1":{"position":{"x":153,"y":221}},"n5":{"position":{"x":400,"y":316}},"n3":{"position":{"x":266,"y":179}},"n4":{"position":{"x":154,"y":134}}},"edges":{}},{"name":"flat","nodes":{"n4":{"position":{"x":257,"y":114}},"n3":{"position":{"x":424,"y":116}},"n5":{"position":{"x":206,"y":240}},"n1":{"position":{"x":300,"y":241}},"n0":{"position":{"x":176,"y":112}},"n2":{"position":{"x":446,"y":242}}},"edges":{}}]
+ "views":[{"name":"primary","nodes":{"n8":{"position":{"x":389,"y":270}},"n4":{"position":{"x":154,"y":134}},"n3":{"position":{"x":266,"y":179}},"n5":{"position":{"x":261,"y":348}},"n1":{"position":{"x":153,"y":221}},"n0":{"position":{"x":154,"y":63}},"n2":{"position":{"x":65,"y":177}},"n6":{"position":{"x":150,"y":312}},"n7":{"position":{"x":264,"y":267}}},"edges":{}},{"name":"flat","nodes":{"n4":{"position":{"x":257,"y":114}},"n3":{"position":{"x":424,"y":116}},"n5":{"position":{"x":206,"y":240}},"n1":{"position":{"x":300,"y":241}},"n0":{"position":{"x":176,"y":112}},"n2":{"position":{"x":446,"y":242}}},"edges":{}}]
 };
       var g_run = false;
       window.requestAnimFrame = (function(callback) {
@@ -110,7 +113,7 @@
           animate(canvas, cx);
         }
       }, false);
-      
+
       function set_run(new_run) {
         var class_name = (new_run)? "running": "stopped";
         document.getElementById('toggle').setAttribute("class", class_name);
