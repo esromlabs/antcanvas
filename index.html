@@ -18,16 +18,19 @@
     <button id="toggle">toggle run</button>
 	<div class="footer"><small>V_0.0.0.0 (got to start somewhere)</small></div>
     <script>
-      var graph = {"graph":{"name":"ant_check_3","template":"<button id='start_button'>Start</button><div class='counter'></div>"}, "nodes":[
-  {"id":"n8","name":"size","data":{"size":42}},
-  {"id":"n4","data":{"x":0,"y":0},"name":"init"},
-  {"id":"n3","name":"x","data":{}},
-  {"name":"fin","id":"n5"},
-  {"name":"+1","process":["this.x = x + 1;","setPixel(x, y, [0,0,0,255]);"],"id":"n1"},
-  {"name":"start","id":"n0","type":"start"},
+      var graph = {"graph":{"name":"ant_check_4","template":"<button id='start_button'>Start</button><div class='counter'></div>"}, "nodes":[
+  {"name":"y","io":{"selector":"mouse_y","valve":0,"as_type":"integer"},"id":"n11","process":["this.y = mousePos.y;"]},
+  {"id":"n10","name":"x","io":{"selector":"mouse_x","valve":0,"as_type":"integer"},"process":["this.x = mousePos.x;"]},
+  {"id":"n9","name":"min","process":["this.min = Math.min(a, b);"]},
+  {"name":"x+","process":["this.x = x + 1;"],"id":"n7"},
+  {"name":"y+","process":["this.y++;"],"id":"n6","data":{}},
   {"id":"n2","name":"y","data":{}},
-  {"name":"y+","process":["this.y++;"],"id":"n6","data":{"x":0}},
-  {"name":"+1","process":["this.x = x + 1;"],"id":"n7"}
+  {"name":"start","id":"n0","type":"start"},
+  {"name":"x+","process":["this.x = x + 1;","setPixel(x, y, [0,0,0,255]);"],"id":"n1"},
+  {"name":"fin","id":"n5"},
+  {"id":"n3","name":"x","data":{}},
+  {"id":"n4","data":{"x":0,"y":0},"name":"init"},
+  {"id":"n8","name":"size","data":{}}
  ],
  "edges":[
   ["n1","n3","set","","",0],
@@ -49,9 +52,12 @@
   ["n6","n3","set","","",16],
   ["n6","n7","flo","","(y%2)",17],
   ["n7","n8","get","","",18],
-  ["n6","n8","get","","",19]
+  ["n6","n8","get","","",19],
+  ["n8","n9","get","","size",20],
+  ["n9","n10","get","","a",21],
+  ["n9","n11","get","","b",22]
  ],
- "views":[{"name":"primary","nodes":{"n8":{"position":{"x":389,"y":270}},"n4":{"position":{"x":154,"y":134}},"n3":{"position":{"x":266,"y":179}},"n5":{"position":{"x":261,"y":348}},"n1":{"position":{"x":153,"y":221}},"n0":{"position":{"x":154,"y":63}},"n2":{"position":{"x":65,"y":177}},"n6":{"position":{"x":150,"y":312}},"n7":{"position":{"x":264,"y":267}}},"edges":{}},{"name":"flat","nodes":{"n4":{"position":{"x":257,"y":114}},"n3":{"position":{"x":424,"y":116}},"n5":{"position":{"x":206,"y":240}},"n1":{"position":{"x":300,"y":241}},"n0":{"position":{"x":176,"y":112}},"n2":{"position":{"x":446,"y":242}}},"edges":{}}]
+ "views":[{"name":"primary","nodes":{"n11":{"position":{"x":456,"y":230}},"n10":{"position":{"x":455,"y":171}},"n9":{"position":{"x":380,"y":230}},"n7":{"position":{"x":264,"y":267}},"n6":{"position":{"x":150,"y":312}},"n2":{"position":{"x":65,"y":177}},"n0":{"position":{"x":154,"y":63}},"n1":{"position":{"x":153,"y":221}},"n5":{"position":{"x":261,"y":348}},"n3":{"position":{"x":266,"y":179}},"n4":{"position":{"x":154,"y":134}},"n8":{"position":{"x":382,"y":303}}},"edges":{}},{"name":"flat","nodes":{"n4":{"position":{"x":257,"y":114}},"n3":{"position":{"x":424,"y":116}},"n5":{"position":{"x":206,"y":240}},"n1":{"position":{"x":300,"y":241}},"n0":{"position":{"x":176,"y":112}},"n2":{"position":{"x":446,"y":242}}},"edges":{}}]
 };
       var g_run = false;
       window.requestAnimFrame = (function(callback) {
@@ -99,7 +105,17 @@
       // create a one pixel image to be used to paint one pixel
       var id = cx.createImageData(1,1); // only do this once per page
       var d  = id.data;
+      function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+        };
+      }
 
+      canvas.addEventListener('mousemove', function(evt) {
+        mousePos = getMousePos(canvas, evt);
+      }, false);
       // bind event handler to clear button
       document.getElementById('toggle').addEventListener('click', function() {
         g_run = set_run(!g_run);

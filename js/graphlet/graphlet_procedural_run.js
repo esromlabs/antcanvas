@@ -107,8 +107,6 @@ isArraylike: function (obj) {
 (function(U, gq) {
   var glt;
   var current_node;
-  var step_rate = 0;
-
 
   var unpack_edge = function(e) {
     return {"from":e[0], "to":e[1], "edge_type":e[2], "name":e[3], "guard":e[4], "index":e[5] };
@@ -127,19 +125,16 @@ isArraylike: function (obj) {
       // get edges use the "guard" as an "alias"
       var alias = edge.guard || name;
       var selector;
-      if (step_rate) {
-        vis_run_state("edge[source='"+edge.from+"'][target='"+edge.to+"'][edge_type='get']", "active_run_get", step_rate/2);
-      }
       //noio//
       if (end_node.io && name === end_node.io.selector.substr(1)) {
           console.log("Warning: io node not implemented for get_edge. ", JSON.stringify(end_node.io));
       }
-      if (end_node.data) {
+      if (end_node.data && end_node.data[name] !== undefined && (end_node.process === undefined || end_node.process.length === 0)) {
 		    got_obj[alias] = end_node.data[name];
-        if (step_rate) {
-          vis_run_state("node[id='"+end_node.id+"']", "active_run_get", step_rate/2);
-        }
 	    }
+      else {
+        got_obj[alias] = fetch(end_node)[name];
+      }
     });
     return got_obj;
   };
@@ -155,9 +150,6 @@ isArraylike: function (obj) {
       guard = run_edge_guard(result, edge.guard);
     }
 
-    if (step_rate && guard.result) {
-      vis_run_state("edge[source='"+edge.from+"'][target='"+edge.to+"'][edge_type='set']", "active_run_set", step_rate/2);
-    }
     if (guard.result) {
       if (name.charAt(0) === ".") {
         console.log("Warning: . in set edge is not implemented. ", JSON.stringify(edge));
@@ -176,9 +168,6 @@ isArraylike: function (obj) {
 					//$(end_node.io.selector).val(end_node.data[name]);
 				}
 				set_all(edge.to, result);
-				if (step_rate) {
-				  vis_run_state("node[id='"+end_node.id+"']", "active_run_set", step_rate/2);
-        }
       }
     }
   };
@@ -234,52 +223,48 @@ isArraylike: function (obj) {
         }
       });
     }
-  };
-
-  run_node = function() {
-    var target_node = current_node;
-    var orig_step_rate = step_rate;
-    var pause_mode = false;
-    // get phase
-    var get_data = get_all(target_node.id);
-    var this_node;
-    var wait = function(milliseconds) {
-      console.log("wait() defers transition at node "+target_node.id+" by "+milliseconds);
-      get_data.defered_transition = true;
-      setTimeout(function() {transition_to(target_node.id, {});}, milliseconds);
-    };
-    //if (vis_node_selected(target_node.id)) {
-    //  pause_mode = true;
-    //  step_rate = 5000;
-    //}
-    //if (step_rate) {
-    //  vis_run_state("node[id='"+target_node.id+"']", "active_run_node", step_rate);
-    //}
-    get_data.defered_transition = false;
-    if (target_node.data) {
-      get_data = U.extend(get_data, target_node.data);
-    }
-    // process phase
-    if (target_node.process) {
-      get_data.wait = wait;
-      get_data.target_node_id = target_node.id;
-      U.each(target_node.process, function run_proc(i, process) {
-        get_data = run_node_process(get_data, process);
-      });
-    }
-
-    //setTimeout(function() {
-    // set phase
-    set_all(target_node.id, get_data);
-    // transition phase
-    if (!get_data.defered_transition) {
-      transition_to(target_node.id, get_data);
-    }
-    //}, step_rate/2);
-
-    step_rate = orig_step_rate;
     return current_node;
   };
+
+  var fetch = function(target_node) {
+      // get phase
+      var get_data = get_all(target_node.id);
+
+      if (target_node.data) {
+        get_data = U.extend(get_data, target_node.data);
+      }
+      // process phase
+      if (target_node.process) {
+        U.each(target_node.process, function run_proc(i, process) {
+          get_data = run_node_process(get_data, process);
+        });
+      }
+
+      return get_data;
+    };
+
+    run_node = function() {
+      var target_node = current_node;
+      // get phase
+      var get_data = get_all(target_node.id);
+
+      if (target_node.data) {
+        get_data = U.extend(get_data, target_node.data);
+      }
+      // process phase
+      if (target_node.process) {
+        get_data.target_node_id = target_node.id;
+        U.each(target_node.process, function run_proc(i, process) {
+          get_data = run_node_process(get_data, process);
+        });
+      }
+
+      // set phase
+      set_all(target_node.id, get_data);
+      // transition phase
+      current_node = transition_to(target_node.id, get_data);
+      return current_node;
+    };
 
 	// sandbox for functional (saferEval)
 	// create our own local versions of window and document with limited functionality
@@ -352,11 +337,6 @@ isArraylike: function (obj) {
 		sandbox(); // call the user code in the sandbox
 		return result;
 	};
-
-  set_step_rate = function() {
-    //step_rate = parseInt($("#run_step_rate").val(), 10) || 0;
-    //$('body').trigger('run_step_rate_change', step_rate);
-  };
 
   // pass in a graphlet data structure to be run.
   init_graphlet = function(g) {
