@@ -87,11 +87,17 @@
 
       function setPixel(x, y, color) {
         // write a pixel
-        d[0]   = color[0];
-        d[1]   = color[1];
-        d[2]   = color[2];
-        d[3]   = color[3];
-        cx.putImageData(id, x, y);
+        x += 1; y += 1;
+        if (x && y) {
+          d[0]   = color[0];
+          d[1]   = color[1];
+          d[2]   = color[2];
+          d[3]   = color[3];
+          cx.putImageData(id, x, y);
+        }
+        else {
+          alert("infinity");
+        }
       }
       function isSteppedOn(x, y) {
         var p = cx.getImageData(x, y, 1, 1).data;

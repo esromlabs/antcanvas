@@ -12,16 +12,16 @@ var U = {
     "[object RegExp]": "regexp",
     "[object Object]": "object",
     "[object Error]": "error"
-},
-"type": function (obj) {
-    if (obj == null) {
-        return String(obj);
-    }
-    // Support: Safari <= 5.1 (functionish RegExp)
-    var s = new Object();
-    return typeof obj === "object" || typeof obj === "function" ? this.class2type[s.toString.call(obj)] || "object" : typeof obj;
-},
-isArraylike: function (obj) {
+  },
+  "type": function (obj) {
+      if (obj == null) {
+          return String(obj);
+      }
+      // Support: Safari <= 5.1 (functionish RegExp)
+      var s = new Object();
+      return typeof obj === "object" || typeof obj === "function" ? this.class2type[s.toString.call(obj)] || "object" : typeof obj;
+  },
+  isArraylike: function (obj) {
     var length = obj.length,
         type = this.type(obj);
 
@@ -30,54 +30,54 @@ isArraylike: function (obj) {
     }
 
     return type === "array" || type !== "function" && (length === 0 || typeof length === "number" && length > 0 && (length - 1) in obj);
-},
+  },
   each: function (obj, callback, args) {
-    var value, i = 0,
-        length = obj.length,
-        isArray = this.isArraylike(obj);
+      var value, i = 0,
+          length = obj.length,
+          isArray = this.isArraylike(obj);
 
-    if (args) {
-        if (isArray) {
-            for (; i < length; i++) {
-                value = callback.apply(obj[i], args);
+      if (args) {
+          if (isArray) {
+              for (; i < length; i++) {
+                  value = callback.apply(obj[i], args);
 
-                if (value === false) {
-                    break;
-                }
-            }
-        } else {
-            for (i in obj) {
-                value = callback.apply(obj[i], args);
+                  if (value === false) {
+                      break;
+                  }
+              }
+          } else {
+              for (i in obj) {
+                  value = callback.apply(obj[i], args);
 
-                if (value === false) {
-                    break;
-                }
-            }
-        }
+                  if (value === false) {
+                      break;
+                  }
+              }
+          }
 
-        // A special, fast, case for the most common use of each
-    } else {
-        if (isArray) {
-            for (; i < length; i++) {
-                value = callback.call(obj[i], i, obj[i]);
+          // A special, fast, case for the most common use of each
+      } else {
+          if (isArray) {
+              for (; i < length; i++) {
+                  value = callback.call(obj[i], i, obj[i]);
 
-                if (value === false) {
-                    break;
-                }
-            }
-        } else {
-            for (i in obj) {
-                value = callback.call(obj[i], i, obj[i]);
+                  if (value === false) {
+                      break;
+                  }
+              }
+          } else {
+              for (i in obj) {
+                  value = callback.call(obj[i], i, obj[i]);
 
-                if (value === false) {
-                    break;
-                }
-            }
-        }
-    }
+                  if (value === false) {
+                      break;
+                  }
+              }
+          }
+      }
 
-    return obj;
-},
+      return obj;
+  },
   // Deep extend
   // If a key has another object as its value, the first object's value will be combined with the second one during the merge.
   extend: function ( objects ) {
@@ -241,9 +241,9 @@ isArraylike: function (obj) {
       }
 
       return get_data;
-    };
+  };
 
-    run_node = function() {
+  run_node = function() {
       var target_node = current_node;
       // get phase
       var get_data = get_all(target_node.id);
@@ -253,7 +253,10 @@ isArraylike: function (obj) {
       }
       // process phase
       if (target_node.process) {
-        get_data.target_node_id = target_node.id;
+        //get_data.target_node_id = target_node.id;
+        if (!get_data.x && get_data.x !== undefined && get_data.x !== 0) {
+          alert('Nan');
+        }
         U.each(target_node.process, function run_proc(i, process) {
           get_data = run_node_process(get_data, process);
         });
@@ -264,7 +267,7 @@ isArraylike: function (obj) {
       // transition phase
       current_node = transition_to(target_node.id, get_data);
       return current_node;
-    };
+  };
 
 	// sandbox for functional (saferEval)
 	// create our own local versions of window and document with limited functionality
