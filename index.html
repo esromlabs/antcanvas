@@ -19,14 +19,33 @@
 	<div class="footer"><small>V_0.0.0.0 (got to start somewhere)</small></div>
     <script>
       var graph = {"graph":{"name":"ant_check_4","template":"<button id='start_button'>Start</button><div class='counter'></div>"}, "nodes":[
-  {"name":"y","io":{"selector":"mouse_y","valve":0,"as_type":"integer"},"id":"n11","process":["this.y = mousePos.y;"]},
-  {"id":"n10","name":"x","io":{"selector":"mouse_x","valve":0,"as_type":"integer"},"process":["this.x = mousePos.x;"]},
-  {"id":"n9","name":"min","process":["this.min = Math.min(a, b);"]},
-  {"name":"x+","process":["this.x = x + 1;"],"id":"n7"},
-  {"name":"y+","process":["this.y++;"],"id":"n6","data":{}},
+  {"name":"y","io":{"selector":"mouse_y","valve":0,"as_type":"integer"},"id":"n11","process":
+  function (n) {
+    n.y = mousePos.y;
+    }},
+  {"id":"n10","name":"x","io":{"selector":"mouse_x","valve":0,"as_type":"integer"},"process":
+  function (n) {
+    n.x = mousePos.x;
+    }},
+  {"id":"n9","name":"min","process":
+  function (n) {
+    n.min = Math.min(n.a, n.b);
+    }},
+  {"name":"x+","process":
+  function (n) {
+    n.x = n.x + 1;
+    },"id":"n7"},
+  {"name":"y+","process":
+  function (n) {
+    n.y++;
+  },"id":"n6","data":{x:0}},
   {"id":"n2","name":"y","data":{}},
   {"name":"start","id":"n0","type":"start"},
-  {"name":"x+","process":["this.x = x + 1;","setPixel(x, y, [0,0,0,255]);"],"id":"n1"},
+  {"name":"x+","process":
+  function (n) {
+    n.x = n.x + 1;
+    setPixel(n.x, n.y, [0,0,0,255]);
+    },"id":"n1"},
   {"name":"fin","id":"n5"},
   {"id":"n3","name":"x","data":{}},
   {"id":"n4","data":{"x":0,"y":0},"name":"init"},

@@ -235,9 +235,14 @@ var U = {
       }
       // process phase
       if (target_node.process) {
-        U.each(target_node.process, function run_proc(i, process) {
-          get_data = run_node_process(get_data, process);
-        });
+        if (!U.isArraylike(target_node.process)) {
+          target_node.process.call(this, get_data);
+        }
+        else {
+          U.each(target_node.process, function run_proc(i, process) {
+            get_data = run_node_process(get_data, process);
+          });
+        }
       }
 
       return get_data;
@@ -257,9 +262,14 @@ var U = {
         if (!get_data.x && get_data.x !== undefined && get_data.x !== 0) {
           alert('Nan');
         }
-        U.each(target_node.process, function run_proc(i, process) {
-          get_data = run_node_process(get_data, process);
-        });
+        if (!U.isArraylike(target_node.process)) {
+          target_node.process.call(this, get_data);
+        }
+        else {
+          U.each(target_node.process, function run_proc(i, process) {
+            get_data = run_node_process(get_data, process);
+          });
+        }
       }
 
       // set phase
