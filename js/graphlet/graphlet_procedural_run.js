@@ -236,7 +236,7 @@ var U = {
       // process phase
       if (target_node.process) {
         if (!U.isArraylike(target_node.process)) {
-          target_node.process.call(this, get_data);
+          target_node.process(get_data);
         }
         else {
           U.each(target_node.process, function run_proc(i, process) {
@@ -263,7 +263,7 @@ var U = {
           alert('Nan');
         }
         if (!U.isArraylike(target_node.process)) {
-          target_node.process.call(this, get_data);
+          target_node.process(get_data);
         }
         else {
           U.each(target_node.process, function run_proc(i, process) {
